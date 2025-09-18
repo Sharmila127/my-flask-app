@@ -64,7 +64,10 @@ jobs:
       # -------------------------
       # 5. Trivy Security Scan
       # -------------------------
-      - name: Run Trivy Scan
+      - name: Prepare Reports Directory
+        run: mkdir -p $REPORTS_DIR
+
+      - name: Run Trivy Scan (Table/Text)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.IMAGE_NAME }}
@@ -75,8 +78,11 @@ jobs:
 
       - name: Run Trivy Scan (HTML)
         run: |
-          mkdir -p $REPORTS_DIR
-          trivy image --severity HIGH,CRITICAL -f html -o $REPORTS_DIR/trivy-image-report.html $IMAGE_NAME || true
+          trivy image --skip-version-check \
+            --severity HIGH,CRITICAL \
+            -f html \
+            -o $REPORTS_DIR/trivy-image-report.html \
+            $IMAGE_NAME || true
 
       - name: Upload Trivy Reports
         uses: actions/upload-artifact@v4
